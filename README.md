@@ -8,7 +8,7 @@
 cd backend
 mvn spring-boot:run
 ```
-默认监听 `http://localhost:8080`，连接本地 MySQL (默认 `jdbc:mysql://localhost:3306/campus_partner`，用户名 `root`，密码 `123456`)，启动时自动迁移表结构，并在 Neo4j (默认 `bolt://localhost:7687`，用户名 `neo4j`，密码 `changeme`) 中同步学生、课程、兴趣标签及合作关系。健康检查：`GET /api/health`。
+默认监听 `http://localhost:8080`，连接本地 MySQL (默认 `jdbc:mysql://localhost:3306/campus_partner`，用户名 `root`，密码 `87609215Bb@`)，启动时自动迁移表结构，并在 Neo4j (默认 `bolt://localhost:7687`，用户名 `neo4j`，密码 `87609215Bb@`) 中同步学生、课程、兴趣标签及合作关系。健康检查：`GET /api/health`。
 
 > 如需调整数据库，编辑 `backend/src/main/resources/application.properties` 或设置环境变量：
 > - `SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD` 覆盖 MySQL 连接
