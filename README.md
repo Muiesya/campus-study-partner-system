@@ -1,6 +1,6 @@
 # campus-study-partner-system
 
-校园学习伙伴推荐系统，后端基于 **Java Spring Boot + JPA + MySQL**，前端基于 **Vue 3 + Vite + Axios**，覆盖学生、课程、兴趣标签、合作记录与推荐能力的最小可运行原型。
+校园学习伙伴推荐系统，后端基于 **Java Spring Boot + JPA + MySQL**，并额外将核心实体关系同步至 **Neo4j** 图数据库；前端基于 **Vue 3 + Vite + Axios**，覆盖学生、课程、兴趣标签、合作记录与推荐能力的最小可运行原型。
 
 ## 后端（Java / Spring Boot）
 ### 运行
@@ -8,9 +8,11 @@
 cd backend
 mvn spring-boot:run
 ```
-默认监听 `http://localhost:8080`，连接本地 MySQL (默认 `jdbc:mysql://localhost:3306/campus_partner`，用户名 `root`，密码 `123456`)，启动时自动迁移表结构。健康检查：`GET /api/health`。
+默认监听 `http://localhost:8080`，连接本地 MySQL (默认 `jdbc:mysql://localhost:3306/campus_partner`，用户名 `root`，密码 `123456`)，启动时自动迁移表结构，并在 Neo4j (默认 `bolt://localhost:7687`，用户名 `neo4j`，密码 `changeme`) 中同步学生、课程、兴趣标签及合作关系。健康检查：`GET /api/health`。
 
-> 如需调整数据库，编辑 `backend/src/main/resources/application.properties` 或设置环境变量 `SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD` 覆盖默认值。
+> 如需调整数据库，编辑 `backend/src/main/resources/application.properties` 或设置环境变量：
+> - `SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD` 覆盖 MySQL 连接
+> - `SPRING_NEO4J_URI`、`SPRING_NEO4J_AUTHENTICATION_USERNAME`、`SPRING_NEO4J_AUTHENTICATION_PASSWORD` 覆盖 Neo4j 连接
 
 ### 主要接口
 - 创建学生：`POST /api/students` (body: `{ "name": "张三", "major": "CS" }`)

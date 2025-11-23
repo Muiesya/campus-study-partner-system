@@ -9,6 +9,7 @@ import com.campus.partner.repository.CollaborationRepository;
 import com.campus.partner.repository.CourseRepository;
 import com.campus.partner.repository.InterestTagRepository;
 import com.campus.partner.repository.StudentRepository;
+import com.campus.partner.service.GraphSyncService;
 import com.campus.partner.service.RecommendationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +28,17 @@ public class StudentController {
     private final InterestTagRepository tagRepository;
     private final CollaborationRepository collaborationRepository;
     private final RecommendationService recommendationService;
+    private final GraphSyncService graphSyncService;
 
     public StudentController(StudentRepository studentRepository, CourseRepository courseRepository,
                              InterestTagRepository tagRepository, CollaborationRepository collaborationRepository,
-                             RecommendationService recommendationService) {
+                             RecommendationService recommendationService, GraphSyncService graphSyncService) {
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
         this.tagRepository = tagRepository;
         this.collaborationRepository = collaborationRepository;
         this.recommendationService = recommendationService;
+        this.graphSyncService = graphSyncService;
     }
 
     @GetMapping("/health")
@@ -49,7 +52,9 @@ public class StudentController {
     @PostMapping("/students")
     public Student createStudent(@Valid @RequestBody StudentRequest request) {
         Student student = new Student(request.getName(), request.getMajor());
-        return studentRepository.save(student);
+        Student saved = studentRepository.save(student);
+        graphSyncService.syncStudent(saved);
+        return saved;
     }
 
     @GetMapping("/students")
@@ -60,7 +65,9 @@ public class StudentController {
     @PostMapping("/courses")
     public Course createCourse(@Valid @RequestBody CourseRequest request) {
         Course course = new Course(request.getName(), request.getDescription());
-        return courseRepository.save(course);
+        Course saved = courseRepository.save(course);
+        graphSyncService.syncCourse(saved);
+        return saved;
     }
 
     @GetMapping("/courses")
@@ -71,7 +78,9 @@ public class StudentController {
     @PostMapping("/tags")
     public InterestTag createTag(@Valid @RequestBody TagRequest request) {
         InterestTag tag = new InterestTag(request.getName());
-        return tagRepository.save(tag);
+        InterestTag saved = tagRepository.save(tag);
+        graphSyncService.syncTag(saved);
+        return saved;
     }
 
     @GetMapping("/tags")
@@ -85,8 +94,9 @@ public class StudentController {
         Course course = courseRepository.findById(courseId).orElseThrow();
         student.getCourses().add(course);
         course.getStudents().add(student);
-        studentRepository.save(student);
-        return ResponseEntity.ok(student);
+        Student saved = studentRepository.save(student);
+        graphSyncService.linkStudentCourse(saved, course);
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/students/{studentId}/tags/{tagId}")
@@ -95,8 +105,9 @@ public class StudentController {
         InterestTag tag = tagRepository.findById(tagId).orElseThrow();
         student.getTags().add(tag);
         tag.getStudents().add(student);
-        studentRepository.save(student);
-        return ResponseEntity.ok(student);
+        Student saved = studentRepository.save(student);
+        graphSyncService.linkStudentTag(saved, tag);
+        return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/collaborations")
@@ -111,7 +122,9 @@ public class StudentController {
         Collaboration collaboration = collaborationRepository.findPair(first, second)
                 .orElseGet(() -> new Collaboration(s1, s2, 0));
         collaboration.setCount(collaboration.getCount() + 1);
-        return collaborationRepository.save(collaboration);
+        Collaboration saved = collaborationRepository.save(collaboration);
+        graphSyncService.recordCollaboration(s1, s2);
+        return saved;
     }
 
     @GetMapping("/students/{studentId}/recommendations")
