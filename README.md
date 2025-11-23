@@ -1,6 +1,6 @@
 # campus-study-partner-system
 
-校园学习伙伴推荐系统，后端基于 **Java Spring Boot + JPA + H2**，前端基于 **Vue 3 + Vite + Axios**，覆盖学生、课程、兴趣标签、合作记录与推荐能力的最小可运行原型。
+校园学习伙伴推荐系统，后端基于 **Java Spring Boot + JPA + MySQL**，前端基于 **Vue 3 + Vite + Axios**，覆盖学生、课程、兴趣标签、合作记录与推荐能力的最小可运行原型。
 
 ## 后端（Java / Spring Boot）
 ### 运行
@@ -8,7 +8,9 @@
 cd backend
 mvn spring-boot:run
 ```
-默认监听 `http://localhost:8080`，内置 H2 文件数据库 `./data/appdb` 并自动迁移表结构。健康检查：`GET /api/health`。
+默认监听 `http://localhost:8080`，连接本地 MySQL (默认 `jdbc:mysql://localhost:3306/campus_partner`，用户名 `root`，密码 `123456`)，启动时自动迁移表结构。健康检查：`GET /api/health`。
+
+> 如需调整数据库，编辑 `backend/src/main/resources/application.properties` 或设置环境变量 `SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD` 覆盖默认值。
 
 ### 主要接口
 - 创建学生：`POST /api/students` (body: `{ "name": "张三", "major": "CS" }`)
@@ -31,7 +33,7 @@ npm run dev
 ## 目录结构
 - `backend/`：Spring Boot 源码与 `pom.xml`
 - `frontend/`：Vue 3 + Vite 前端工程
-- `app/`：保留的早期 Python 原型代码（现已被 Java 实现取代）
+- `app/`：已移除的早期 Python 原型代码（全部功能由 Java 实现提供）
 
 ## 设计文档
 根目录提供《小组2概要设计说明书.docx》，后端模型与接口遵循该文档中的实体与推荐需求。

@@ -1,8 +1,4 @@
-__pycache__/
-*.pyc
-app.db
 node_modules/
 target/
-.h2.server.properties
 .vscode/
 .idea/
