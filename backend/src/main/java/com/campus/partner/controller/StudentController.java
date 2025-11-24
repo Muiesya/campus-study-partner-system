@@ -12,9 +12,11 @@ import com.campus.partner.repository.StudentRepository;
 import com.campus.partner.service.GraphSyncService;
 import com.campus.partner.service.RecommendationService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -92,10 +94,12 @@ public class StudentController {
     @PostMapping("/students/{studentId}/courses/{courseId}")
     @Transactional
     public ResponseEntity<Student> addCourse(@PathVariable Long studentId, @PathVariable Long courseId) {
-        Student student = studentRepository.findById(studentId).orElseThrow();
-        Course course = courseRepository.findById(courseId).orElseThrow();
-        student.getCourses().add(course);
-        course.getStudents().add(student);
+        Student student = findStudentOrThrow(studentId);
+        Course course = findCourseOrThrow(courseId);
+        if (!student.getCourses().contains(course)) {
+            student.getCourses().add(course);
+            course.getStudents().add(student);
+        }
         Student saved = studentRepository.saveAndFlush(student);
         graphSyncService.linkStudentCourse(saved, course);
         return ResponseEntity.ok(saved);
@@ -104,10 +108,12 @@ public class StudentController {
     @PostMapping("/students/{studentId}/tags/{tagId}")
     @Transactional
     public ResponseEntity<Student> addTag(@PathVariable Long studentId, @PathVariable Long tagId) {
-        Student student = studentRepository.findById(studentId).orElseThrow();
-        InterestTag tag = tagRepository.findById(tagId).orElseThrow();
-        student.getTags().add(tag);
-        tag.getStudents().add(student);
+        Student student = findStudentOrThrow(studentId);
+        InterestTag tag = findTagOrThrow(tagId);
+        if (!student.getTags().contains(tag)) {
+            student.getTags().add(tag);
+            tag.getStudents().add(student);
+        }
         Student saved = studentRepository.saveAndFlush(student);
         graphSyncService.linkStudentTag(saved, tag);
         return ResponseEntity.ok(saved);
@@ -120,8 +126,8 @@ public class StudentController {
         }
         Long first = Math.min(request.getStudentId1(), request.getStudentId2());
         Long second = Math.max(request.getStudentId1(), request.getStudentId2());
-        Student s1 = studentRepository.findById(first).orElseThrow();
-        Student s2 = studentRepository.findById(second).orElseThrow();
+        Student s1 = findStudentOrThrow(first);
+        Student s2 = findStudentOrThrow(second);
         Collaboration collaboration = collaborationRepository.findPair(first, second)
                 .orElseGet(() -> new Collaboration(s1, s2, 0));
         collaboration.setCount(collaboration.getCount() + 1);
@@ -133,5 +139,20 @@ public class StudentController {
     @GetMapping("/students/{studentId}/recommendations")
     public List<RecommendationEntry> recommend(@PathVariable Long studentId, @RequestParam(defaultValue = "5") int limit) {
         return recommendationService.recommendFor(studentId, limit);
+    }
+
+    private Student findStudentOrThrow(Long studentId) {
+        return studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在: " + studentId));
+    }
+
+    private Course findCourseOrThrow(Long courseId) {
+        return courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "课程不存在: " + courseId));
+    }
+
+    private InterestTag findTagOrThrow(Long tagId) {
+        return tagRepository.findById(tagId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "标签不存在: " + tagId));
     }
 }

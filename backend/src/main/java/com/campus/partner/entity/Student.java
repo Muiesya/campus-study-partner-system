@@ -3,6 +3,7 @@ package com.campus.partner.entity;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -61,5 +62,18 @@ public class Student {
 
     public Set<InterestTag> getTags() {
         return tags;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Student student = (Student) o;
+        return Objects.equals(id, student.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
