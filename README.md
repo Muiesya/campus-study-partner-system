@@ -8,7 +8,7 @@
 cd backend
 mvn spring-boot:run
 ```
-默认监听 `http://localhost:8080`，连接本地 MySQL (默认 `jdbc:mysql://localhost:3306/campus_partner`，用户名 `root`，密码 `87609215Bb@`)，启动时自动迁移表结构，并在 Neo4j (默认 `bolt://localhost:7687`，用户名 `neo4j`，密码 `87609215Bb@`) 中同步学生、课程、兴趣标签及合作关系。健康检查：`GET /api/health`。
+默认监听 `http://localhost:8080`，连接本地 MySQL (默认 `jdbc:mysql://localhost:3306/campus_partner`，用户名 `root`，密码 `87609215Bb@`)，启动时自动迁移表结构，并在 Neo4j (默认 `bolt://localhost:7687`，用户名 `neo4j`，密码 `87609215Bb@`) 中同步学生、课程、兴趣标签及合作关系。若 Neo4j 未启动或不可达，后端会记录警告但不会中断请求，仍照常将数据写入 MySQL。健康检查：`GET /api/health`。
 
 > 如果 Maven 访问中央仓库出现 403，可直接使用项目内置的 `.mvn/settings.xml`（已配置阿里云、腾讯云与华为云镜像）。
 
