@@ -14,6 +14,7 @@ import com.campus.partner.service.RecommendationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -89,23 +90,25 @@ public class StudentController {
     }
 
     @PostMapping("/students/{studentId}/courses/{courseId}")
+    @Transactional
     public ResponseEntity<Student> addCourse(@PathVariable Long studentId, @PathVariable Long courseId) {
         Student student = studentRepository.findById(studentId).orElseThrow();
         Course course = courseRepository.findById(courseId).orElseThrow();
         student.getCourses().add(course);
         course.getStudents().add(student);
-        Student saved = studentRepository.save(student);
+        Student saved = studentRepository.saveAndFlush(student);
         graphSyncService.linkStudentCourse(saved, course);
         return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/students/{studentId}/tags/{tagId}")
+    @Transactional
     public ResponseEntity<Student> addTag(@PathVariable Long studentId, @PathVariable Long tagId) {
         Student student = studentRepository.findById(studentId).orElseThrow();
         InterestTag tag = tagRepository.findById(tagId).orElseThrow();
         student.getTags().add(tag);
         tag.getStudents().add(student);
-        Student saved = studentRepository.save(student);
+        Student saved = studentRepository.saveAndFlush(student);
         graphSyncService.linkStudentTag(saved, tag);
         return ResponseEntity.ok(saved);
     }
